@@ -1,0 +1,6 @@
+// .netlify/deploy/v1/config.json
+{
+  "images": {
+    "remote_images": ["https://img.notionusercontent.com/.*"]
+  }
+}
