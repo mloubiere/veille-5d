@@ -5,6 +5,7 @@ import { fr } from 'date-fns/locale';
 import { supabase } from '../lib/supabase';
 import { Calendar, X, Filter } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
+import LikeButton from '../components/LikeButton';
 
 interface Article {
   id: string;
@@ -229,8 +230,11 @@ const HomePage = () => {
                 />
               )}
               <div className="p-4">
-                <div className="text-sm text-[#005953] font-medium mb-2">
-                  {article.category}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-sm text-[#005953] font-medium">
+                    {article.category}
+                  </div>
+                  <LikeButton articleId={article.id} variant="card" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">
                   {article.title}
