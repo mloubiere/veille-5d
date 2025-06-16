@@ -44,14 +44,14 @@ export const useLikes = (articleId: string) => {
         .select('id')
         .eq('article_id', articleId)
         .eq('user_session', sessionId)
-        .single();
+        .limit(1);
 
-      if (likeError && likeError.code !== 'PGRST116') {
+      if (likeError) {
         console.error('Error checking like status:', likeError);
         return;
       }
 
-      setIsLiked(!!likeData);
+      setIsLiked(likeData && likeData.length > 0);
     } catch (error) {
       console.error('Error in fetchLikeStatus:', error);
     }
