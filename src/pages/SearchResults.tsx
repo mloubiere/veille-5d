@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import Highlighter from 'react-highlight-words';
 import { ArrowLeft } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
+import LikeButton from '../components/LikeButton';
 
 interface Article {
   id: string;
@@ -110,13 +111,16 @@ const SearchResults = () => {
                   </div>
                 )}
                 <div className="flex-1 p-6">
-                  <div className="text-sm text-[#005953] font-medium mb-2">
-                    <Highlighter
-                      highlightClassName="bg-yellow-200"
-                      searchWords={[query]}
-                      autoEscape={true}
-                      textToHighlight={article.category || ''}
-                    />
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-[#005953] font-medium">
+                      <Highlighter
+                        highlightClassName="bg-yellow-200"
+                        searchWords={[query]}
+                        autoEscape={true}
+                        textToHighlight={article.category || ''}
+                      />
+                    </div>
+                    <LikeButton articleId={article.id} variant="card" />
                   </div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">
                     <Highlighter

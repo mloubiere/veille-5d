@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { supabase } from '../lib/supabase';
 import { ArrowLeft } from 'lucide-react';
+import LikeButton from '../components/LikeButton';
 
 interface Article {
   id: string;
@@ -127,8 +128,11 @@ const ArticlePage = () => {
         />
       )}
       <div className="space-y-4">
-        <div className="text-[#005953] font-medium">
-          {article.category}
+        <div className="flex items-center justify-between">
+          <div className="text-[#005953] font-medium">
+            {article.category}
+          </div>
+          <LikeButton articleId={article.id} variant="article" />
         </div>
         <h1 className="text-4xl font-bold text-gray-900">
           {article.title}
@@ -174,8 +178,11 @@ const ArticlePage = () => {
                     </div>
                   )}
                   <div className="flex-1 p-4">
-                    <div className="text-sm text-[#005953] font-medium mb-1">
-                      {similarArticle.category}
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="text-sm text-[#005953] font-medium">
+                        {similarArticle.category}
+                      </div>
+                      <LikeButton articleId={similarArticle.id} variant="card" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900">
                       {similarArticle.title}
