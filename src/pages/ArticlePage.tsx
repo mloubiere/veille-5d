@@ -5,6 +5,7 @@ import { fr } from 'date-fns/locale';
 import { supabase } from '../lib/supabase';
 import { ArrowLeft } from 'lucide-react';
 import LikeButton from '../components/LikeButton';
+import { formatNotionContentForDisplay } from '../utils/notionFormatter';
 
 interface Article {
   id: string;
@@ -73,34 +74,54 @@ const ArticlePage = () => {
   };
 
   const formatContent = (content: string) => {
-    const sections = content.split(/(?=# |## |### )/);
-    
-    const formattedSections = sections.map(section => {
-      if (section.startsWith('# ')) {
-        return `<h1 class="text-3xl font-bold mt-8 mb-4">${section.substring(2)}</h1>`;
-      }
-      if (section.startsWith('## ')) {
-        return `<h2 class="text-2xl font-bold mt-6 mb-3">${section.substring(3)}</h2>`;
-      }
-      if (section.startsWith('### ')) {
-        return `<h3 class="text-xl font-semibold mt-4 mb-2">${section.substring(4)}</h3>`;
-      }
-
-      const paragraphs = section.split('\n\n');
+    try {
+      // Try to parse as JSON first (Notion format)
+      const parsedContent = JSON.parse(content);
+      const formatted = formatNotionContentForDisplay(parsedContent);
+      setFormattedContent(formatted);
+    } catch (e) {
+      // If not JSON, treat as legacy markdown/text content
+      const sections = content.split(/(?=# |## |### )/);
       
-      return paragraphs.map(paragraph => {
-        if (!paragraph.trim()) return '';
+      const formattedSections = sections.map(section => {
+        if (section.startsWith('# ')) {
+          return `<h1 class="text-3xl font-bold mt-8 mb-4">${section.substring(2)}</h1>`;
+        }
+        if (section.startsWith('## ')) {
+          return `<h2 class="text-2xl font-bold mt-6 mb-3">${section.substring(3)}</h2>`;
+        }
+        if (section.startsWith('### ')) {
+          return `<h3 class="text-xl font-semibold mt-4 mb-2">${section.substring(4)}</h3>`;
+        }
 
-        const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
-        const textWithLinks = paragraph.replace(urlRegex, url => {
-          return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#005953] hover:underline">${url}</a>`;
-        });
+        const paragraphs = section.split('\n\n');
+        
+        return paragraphs.map(paragraph => {
+          if (!paragraph.trim()) return '';
 
-        return `<p class="mb-4 leading-relaxed">${textWithLinks}</p>`;
-      }).join('\n');
-    });
+          // Handle bold text
+          let processedParagraph = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+          
+          // Handle italic text
+          processedParagraph = processedParagraph.replace(/\*(.*?)\*/g, '<em>$1</em>');
+          
+          // Handle links
+          const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+          processedParagraph = processedParagraph.replace(urlRegex, url => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#005953] hover:underline">${url}</a>`;
+          });
 
-    setFormattedContent(formattedSections.join('\n'));
+          // Handle markdown-style links [text](url)
+          processedParagraph = processedParagraph.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
+            '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-[#005953] hover:underline">$1</a>'
+          );
+
+          return `<p class="mb-4 leading-relaxed">${processedParagraph}</p>`;
+        }).join('\n');
+      });
+
+      setFormattedContent(formattedSections.join('\n'));
+    }
   };
 
   if (!article) {
@@ -151,7 +172,7 @@ const ArticlePage = () => {
           </a>
         )}
         <div 
-          className="prose prose-lg max-w-none mt-8"
+          className="prose prose-lg max-w-none mt-8 [&>*]:max-w-none"
           dangerouslySetInnerHTML={{ __html: formattedContent }}
         />
       </div>
